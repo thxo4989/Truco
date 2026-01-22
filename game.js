@@ -111,15 +111,20 @@ function createGame() {
 }
 
 function joinGame() {
+    console.log("🎮 Tentative de rejoindre une salle...");
+    
     // Vérifier que Firebase est initialisé
     if (typeof db === 'undefined' || !db) {
+        console.error('❌ db is undefined');
         showStatus('Firebase n\'est pas encore chargé... Veuillez attendre.', 'error');
-        console.error('db is undefined, Firebase not initialized');
         return;
     }
     
     const playerName = document.getElementById('playerName').value.trim();
     const roomCode = document.getElementById('roomCode').value.trim();
+
+    console.log("👤 Nom joueur:", playerName);
+    console.log("🔑 Code salle:", roomCode);
 
     if (!playerName) {
         showStatus('Veuillez entrer un nom', 'error');
@@ -135,38 +140,55 @@ function joinGame() {
     gameState.currentPlayer = playerName;
 
     // Vérifier que la salle existe
-    getRoomRef(roomCode).once('value').then(snapshot => {
+    const ref = getRoomRef(roomCode);
+    if (!ref) {
+        showStatus('Erreur: Firebase non initialisé', 'error');
+        return;
+    }
+
+    ref.once('value', (snapshot) => {
+        console.log("📊 Données reçues:", snapshot.val());
+        
         if (!snapshot.exists()) {
+            console.error('❌ Salle non trouvée');
             showStatus('Salle non trouvée', 'error');
             return;
         }
 
         const room = snapshot.val();
+        console.log("✅ Salle trouvée:", room);
 
         // Vérifier que deux joueurs max
         if (room.players.length >= 2) {
+            console.error('❌ La salle est pleine');
             showStatus('La salle est pleine', 'error');
             return;
         }
 
         // Ajouter le joueur à la salle
         const newPlayers = [...room.players, playerName];
-        updateRoom(roomCode, { 
+        const ref2 = getRoomRef(roomCode);
+        ref2.update({ 
             players: newPlayers,
             status: 'playing'
-        }).then(() => {
-            document.getElementById('roomCodeDisplay').textContent = roomCode;
-            document.getElementById('currentPlayerName').textContent = playerName;
-            
-            setTimeout(() => {
-                showScreen('waitingScreen');
-                // Attendre un moment et lancer le jeu
-                setTimeout(() => startGame(roomCode, room.players[0]), 1000);
-            }, 500);
+        }, (error) => {
+            if (error) {
+                console.error('❌ Erreur:', error);
+                showStatus('Erreur: ' + error.message, 'error');
+            } else {
+                console.log("✅ Joueur ajouté!");
+                document.getElementById('roomCodeDisplay').textContent = roomCode;
+                document.getElementById('currentPlayerName').textContent = playerName;
+                
+                setTimeout(() => {
+                    showScreen('waitingScreen');
+                    startGame(roomCode, room.host);
+                }, 500);
+            }
         });
     }).catch(err => {
-        console.error('Erreur:', err);
-        showStatus('Erreur lors de la connexion', 'error');
+        console.error('❌ Erreur Firebase:', err);
+        showStatus('Erreur: ' + err.message, 'error');
     });
 }
 
