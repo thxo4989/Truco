@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truco - Jeu en Ligne</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Écran d'accueil -->
+        <div id="homeScreen" class="screen active">
+            <div class="container">
+                <h1>🃏 TRUCO 🃏</h1>
+                <p class="subtitle">Jeu de cartes traditionnel latino-américain</p>
+                
+                <div class="form-group">
+                    <input type="text" id="playerName" placeholder="Votre nom" maxlength="20">
+                    <input type="text" id="roomCode" placeholder="Code de salle (optionnel)">
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="createGame()">Créer une salle</button>
+                    <button class="btn btn-secondary" onclick="joinGame()">Rejoindre une salle</button>
+                </div>
+
+                <div id="status" class="status-message"></div>
+            </div>
+        </div>
+
+        <!-- Écran de salle d'attente -->
+        <div id="waitingScreen" class="screen">
+            <div class="container">
+                <h2>Salle: <span id="roomCodeDisplay"></span></h2>
+                <p class="subtitle">En attente d'un autre joueur...</p>
+                
+                <div class="players-waiting">
+                    <div class="player-info">
+                        <span id="currentPlayerName"></span>
+                        <span class="status-badge">✓ Connecté</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-secondary" onclick="goHome()">Retour à l'accueil</button>
+            </div>
+        </div>
+
+        <!-- Écran du jeu -->
+        <div id="gameScreen" class="screen">
+            <div class="game-container">
+                <!-- Informations du jeu -->
+                <div class="game-info">
+                    <div class="score-board">
+                        <div class="team-score">
+                            <h3>Équipe 1</h3>
+                            <p id="score1" class="score">0</p>
+                        </div>
+                        <div class="separator">vs</div>
+                        <div class="team-score">
+                            <h3>Équipe 2</h3>
+                            <p id="score2" class="score">0</p>
+                        </div>
+                    </div>
+                    <div class="game-status">
+                        <p id="currentTurn">Tour: Joueur 1</p>
+                        <p id="gamePhase">Phase: En attente</p>
+                    </div>
+                </div>
+
+                <!-- Plateau du jeu -->
+                <div class="game-board">
+                    <!-- Cartes du joueur 1 (adversaire) -->
+                    <div class="player-hand opponent">
+                        <h4 id="opponentName">Joueur 2</h4>
+                        <div class="cards-display">
+                            <div class="card back" id="opponentCard0"></div>
+                            <div class="card back" id="opponentCard1"></div>
+                            <div class="card back" id="opponentCard2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Centre du jeu -->
+                    <div class="game-center">
+                        <div class="table-area">
+                            <div class="played-cards">
+                                <div class="column" id="round1">
+                                    <div class="card-slot" id="round1Player1"></div>
+                                    <div class="card-slot" id="round1Player2"></div>
+                                </div>
+                                <div class="column" id="round2">
+                                    <div class="card-slot" id="round2Player1"></div>
+                                    <div class="card-slot" id="round2Player2"></div>
+                                </div>
+                                <div class="column" id="round3">
+                                    <div class="card-slot" id="round3Player1"></div>
+                                    <div class="card-slot" id="round3Player2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cartes du joueur actuel (vous) -->
+                    <div class="player-hand current">
+                        <h4 id="currentPlayerNameGame">Vous</h4>
+                        <div class="cards-hand">
+                            <div class="card playable" id="card0" onclick="playCard(0)"></div>
+                            <div class="card playable" id="card1" onclick="playCard(1)"></div>
+                            <div class="card playable" id="card2" onclick="playCard(2)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions du jeu -->
+                <div class="game-actions">
+                    <div class="action-buttons">
+                        <button class="btn btn-action" id="trucoBtn" onclick="declareTruco()" disabled>Truco!</button>
+                        <button class="btn btn-action" id="retrucBtn" onclick="declareRetruc()" disabled>Retruc!</button>
+                        <button class="btn btn-action" id="vale4Btn" onclick="declareVale4()" disabled>Vale 4!</button>
+                        <button class="btn btn-action" id="quitBtn" onclick="quitGame()">Quitter</button>
+                    </div>
+                    <div class="round-info">
+                        <p id="roundNumber">Manche 1</p>
+                        <p id="trucValue">Mise: 1 point</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Écran de fin de partie -->
+        <div id="endGameScreen" class="screen">
+            <div class="container">
+                <h2 id="endGameTitle">Fin de la partie</h2>
+                <div class="end-game-content">
+                    <p id="endGameMessage"></p>
+                    <div id="finalScores" class="final-scores"></div>
+                </div>
+                <button class="btn btn-primary" onclick="goHome()">Retour à l'accueil</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts (v9) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="game.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
